@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    network_mode: host
+    volumes:
+      - .:/app
+  db:
+    image: postgres:14
+    restart: always
+    hostname: postgres
+    network_mode: host
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: kube_gopc
+      POSTGRES_HOST: postgres
+  grpc:
+    image: namely/protoc-all
+    volumes:
+      - ".:/dir"
+    working_dir: /dir

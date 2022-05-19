@@ -2,24 +2,56 @@ version: '3.7'
 
 services:
   app:
+    restart: unless-stopped
     build:
       dockerfile: Dockerfile
       context: .
-    network_mode: host
-    volumes:
-      - .:/app
+    depends_on:
+      - db
+      - pgadmin
+    networks:
+      - stacknet
+    ports:
+      - 8080:8080
   db:
     image: postgres:14
-    restart: always
     hostname: postgres
-    network_mode: host
+    restart: always
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: kube_gopc
       POSTGRES_HOST: postgres
-  grpc:
-    image: namely/protoc-all
     volumes:
-      - ".:/dir"
-    working_dir: /dir
+      - $HOME/Desktop/PostgreSql-Snippets/infile:/infile
+      - pg_data:/var/lib/postgresql/data/
+    networks:
+      - stacknet
+  pgadmin:
+    image: "dpage/pgadmin4:6.5"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+       - ./docker_pgadmin_servers.json:/pgadmin4/servers.json
+    ports:
+      - "15433:80"
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - "/bin/echo 'localhost:5432:*:root:password' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+    restart: unless-stopped
+    networks:
+      - stacknet
+
+volumes:
+  pg_data:
+  pgadmin:
+
+
+networks:
+  stacknet:
+    name: stack-network

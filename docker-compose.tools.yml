@@ -1,0 +1,13 @@
+
+version: '3.7'
+
+services:
+  grpc:
+    image: namely/protoc-all
+    volumes:
+      - ".:/dir"
+    working_dir: /dir
+  test_grpc:
+    image: fullstorydev/grpcurl
+    network_mode: host
+

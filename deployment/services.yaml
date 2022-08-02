@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+   app: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube_gopc
+  labels:
+    app: kubr_gopc
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: kube_gopc

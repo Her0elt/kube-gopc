@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube_gopc
+  labels:
+    app: kube_gopc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube_gopc
+  template:
+    metadata:
+      labels:
+        app: kube_gopc
+    spec:
+      containers:
+      - name: kube_gopc
+        image: her0elt/kube_gopc
+        envFrom:
+          - secretRef:
+              name: prod-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:10.1
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
